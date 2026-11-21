@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto API Test Harness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1d2021; --bg2:#282828; --bg3:#32302f;
+    --fg:#ebdbb2; --fg-dim:#a89984; --fg-bright:#fbf1c7;
+    --gold:#d79921; --gold2:#d8a657; --green:#b8bb26; --blue:#83a598;
+    --purple:#d3869b; --red:#fb4934; --border:#3c3836;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Space Grotesk',-apple-system,'Segoe UI',sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(215,153,33,0.10), transparent 45%),
+      radial-gradient(circle at 85% 20%, rgba(131,165,152,0.08), transparent 40%),
+      var(--bg);
+    color:var(--fg); line-height:1.65; overflow-x:hidden;
+  }
+  ::selection{background:var(--gold); color:#1d2021;}
+  .glow-orb{position:fixed; width:340px; height:340px; border-radius:50%;
+    filter:blur(90px); opacity:.5; pointer-events:none; z-index:0; animation:float 12s ease-in-out infinite;}
+  .glow-orb.one{background:rgba(215,153,33,.35); top:-80px; left:-60px;}
+  .glow-orb.two{background:rgba(131,165,152,.3); bottom:-100px; right:-60px; animation-delay:-6s;}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(20px,20px) scale(1.08);}}
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 24px 80px;}
+
+  nav{position:sticky; top:0; z-index:20; background:rgba(29,32,33,.82); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);}
+  .nav{max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:22px; padding:14px 24px;}
+  .brand{font-weight:700; color:var(--fg-bright); letter-spacing:.4px; white-space:nowrap;}
+  .brand .dot{color:var(--gold);}
+  .nav-links{display:flex; gap:18px; margin-left:auto; font-size:.92rem;}
+  .nav-links a{color:var(--fg-dim); text-decoration:none; transition:color .2s;}
+  .nav-links a:hover{color:var(--gold);}
+  .lang-toggle{font-family:'JetBrains Mono',monospace; font-size:.85rem; background:var(--bg2);
+    border:1px solid var(--gold); color:var(--gold); padding:5px 12px; border-radius:6px; cursor:pointer; white-space:nowrap;}
+  .lang-toggle:hover{background:var(--gold); color:#1d2021;}
+
+  header.hero{display:grid; grid-template-columns:1.05fr .95fr; gap:36px; align-items:center; padding:64px 0 40px;}
+  .hero h1{font-size:2.5rem; line-height:1.15; color:var(--fg-bright); margin-bottom:14px;}
+  .hero h1 .hl{color:var(--gold);}
+  .hero .tagline{font-size:1.12rem; color:var(--fg); margin-bottom:12px; font-weight:600;}
+  .hero p.sub{color:var(--fg-dim); font-size:.98rem; margin-bottom:22px;}
+  .hero-btns{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{display:inline-block; padding:11px 22px; border-radius:8px; text-decoration:none; font-weight:600; font-size:.95rem; transition:transform .15s, box-shadow .15s;}
+  .btn.primary{background:var(--gold); color:#1d2021;}
+  .btn.primary:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(215,153,33,.35);}
+  .btn.ghost{border:1px solid var(--border); color:var(--fg);}
+  .btn.ghost:hover{border-color:var(--gold); color:var(--gold);}
+  .metrics{display:flex; gap:22px; margin-top:28px; flex-wrap:wrap;}
+  .metric .num{font-family:'JetBrains Mono',monospace; font-size:1.7rem; color:var(--gold); font-weight:600;}
+  .metric .lbl{font-size:.82rem; color:var(--fg-dim);}
+
+  .term{border:1px solid var(--border); border-radius:var(--radius); background:var(--bg2); overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,.35);}
+  .term .bar{display:flex; align-items:center; gap:6px; padding:10px 14px; background:var(--bg3); border-bottom:1px solid var(--border);}
+  .dotc{width:11px; height:11px; border-radius:50%;}
+  .dotc.r{background:#fb4934;} .dotc.y{background:#fabd2f;} .dotc.g{background:#b8bb26;}
+  .term .bar span{font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--fg-dim); margin-left:8px;}
+  .term .body{font-family:'JetBrains Mono',monospace; font-size:.82rem; padding:18px 20px; min-height:256px; white-space:pre-wrap; color:var(--fg);}
+  .cursor{display:inline-block; width:8px; height:15px; background:var(--gold); animation:blink 1s step-start infinite; vertical-align:middle;}
+  @keyframes blink{50%{opacity:0;}}
+
+  section{padding:52px 0; border-top:1px solid var(--border);}
+  section h2{font-size:1.6rem; color:var(--fg-bright); margin-bottom:24px; display:flex; align-items:center; gap:12px;}
+  section h2::before{content:''; width:5px; height:26px; background:var(--gold); border-radius:3px;}
+
+  .pipe{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:8px 0 6px;}
+  .pipe .node{text-align:center; padding:14px 8px; border-radius:8px; background:var(--bg2); border:1px solid var(--border); position:relative; transition:all .3s;}
+  .pipe .node .n{font-family:'JetBrains Mono',monospace; color:var(--gold); font-size:.9rem; display:block;}
+  .pipe .node .t{font-size:.8rem; color:var(--fg); margin-top:4px;}
+  .pipe .node.done{border-color:var(--green); box-shadow:0 0 14px rgba(184,187,38,.25);}
+  .pipe .node .arrow{position:absolute; right:-11px; top:50%; transform:translateY(-50%); color:var(--fg-dim);}
+  @media(max-width:720px){.pipe{grid-template-columns:1fr;} .pipe .node .arrow{display:none;}}
+  .pipe-legend{font-size:.8rem; color:var(--fg-dim); margin-top:8px;}
+
+  .cmp{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:8px;}
+  .cmp .box{border:1px solid var(--border); border-radius:var(--radius); padding:20px;}
+  .cmp .box.anti{background:rgba(251,73,52,.05); border-color:rgba(251,73,52,.35);}
+  .cmp .box.pro{background:rgba(184,187,38,.05); border-color:rgba(184,187,38,.4);}
+  .cmp h4{color:var(--fg-bright); margin-bottom:10px;}
+  .cmp h4.anti{color:var(--red);} .cmp h4.pro{color:var(--green);}
+  .cmp ul{list-style:none;}
+  .cmp li{padding:5px 0 5px 20px; position:relative; color:var(--fg); font-size:.92rem;}
+  .cmp li::before{position:absolute; left:0; color:var(--gold); content:'▸';}
+  h3.section-quote{font-size:1.3rem; color:var(--gold); margin-top:28px; font-weight:600;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:10px;}
+  .card{background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:transform .2s, border-color .2s;}
+  .card:hover{transform:translateY(-3px); border-color:var(--gold);}
+  .card h4{color:var(--fg-bright); margin-bottom:8px; font-size:1.05rem;}
+  .card code{font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--green);}
+  .card p{color:var(--fg-dim); font-size:.9rem;}
+
+  .try-chips{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .chip{font-family:'JetBrains Mono',monospace; font-size:.82rem; padding:8px 14px; border-radius:6px; border:1px solid var(--gold); background:transparent; color:var(--gold); cursor:pointer; transition:all .2s;}
+  .chip:hover{background:var(--gold); color:#1d2021;}
+  .try-term{border:1px solid var(--border); border-radius:var(--radius); background:var(--bg2); padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:.84rem; overflow:auto;}
+  .try-term .ok{color:var(--green);}
+
+  .tree{font-family:'JetBrains Mono',monospace; font-size:.8rem; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:22px; overflow:auto; color:var(--fg);}
+  .tree .dir{color:var(--gold); cursor:pointer; user-select:none;}
+.tree .hidden{display:none;}
+  .tree .dir:hover{text-decoration:underline;}
+  .tree .comment{color:var(--fg-dim);}
+  .tree .file{color:var(--blue);}
+  .tree details{margin-left:16px;}
+
+  .schedule{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px;}
+  .sched-item{border-left:3px solid var(--gold); background:var(--bg2); padding:14px 16px; border-radius:0 8px 8px 0;}
+  .sched-item .time{font-family:'JetBrains Mono',monospace; color:var(--gold); font-weight:600;}
+  .sched-item .what{color:var(--fg); margin-top:4px; font-size:.92rem;}
+  .sched-item .when{color:var(--fg-dim); font-size:.8rem; margin-top:2px;}
+  .sched-item.now{border-left-color:var(--green); background:rgba(184,187,38,.06);}
+  .sched-item.now .time{color:var(--green);}
+
+  footer{border-top:1px solid var(--border); padding:36px 0 30px; color:var(--fg-dim); font-size:.88rem;}
+  .foot-inner{display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;}
+  .foot-links a{color:var(--gold); text-decoration:none; margin-left:14px;}
+  .foot-links a:hover{text-decoration:underline;}
+  #clock{font-family:'JetBrains Mono',monospace; color:var(--gold);}
+
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:none;}
+
+  @media (prefers-reduced-motion: reduce){
+    .glow-orb,.cursor{animation:none;} .reveal{transition:none; opacity:1; transform:none;}
+  }
+  @media(max-width:720px){
+    header.hero{grid-template-columns:1fr; padding:40px 0 24px;}
+    .nav-links{display:none;}
+    .cmp{grid-template-columns:1fr;}
+    .hero h1{font-size:2rem;}
+  }
+</style>
+</head>
+<body>
+<div class="glow-orb one"></div>
+<div class="glow-orb two"></div>
+
+<nav>
+  <div class="nav">
+    <div class="brand">auto-api<span class="dot">-</span>test-harness</div>
+    <div class="nav-links">
+      <a href="#flow" data-en="Flow" data-zh="流程">流程</a>
+      <a href="#features" data-en="Features" data-zh="功能">功能</a>
+      <a href="#try" data-en="Try it" data-zh="试用">试用</a>
+      <a href="#structure" data-en="Structure" data-zh="结构">结构</a>
+      <a href="#faq" data-en="FAQ" data-zh="FAQ">FAQ</a>
+    </div>
+    <button class="lang-toggle" id="langToggle" type="button">中文 / English</button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="hero reveal in">
+    <div>
+      <h1 data-en="Agent-oriented API testing<br>and <span class='hl'>case evolution</span> framework."
+          data-zh="面向 Agent 的 API 测试<br>与<span class='hl'>用例演进</span>框架。">面向 Agent 的 API 测试<br>与<span class="hl">用例演进</span>框架。</h1>
+      <p class="tagline" data-en="Contracts & changes → executable cases → diagnostic evidence"
+         data-zh="契约与变更 → 可执行用例 → 诊断证据">契约与变更 → 可执行用例 → 诊断证据</p>
+      <p class="sub" data-en="Python + pytest + YAML. HTTP, variables and business assertions are executed by the harness; models participate in planning, candidate generation, semantic diagnosis or report analysis. Pure regression runs offline with LLMOFF=1."
+          data-zh="使用 Python、pytest 和 YAML，把接口契约与变更转成可执行用例，再把回归失败转成诊断证据、复现草稿和待验证的补测候选。HTTP、变量传递和业务断言由 Harness 执行；模型可参与规划、候选生成、语义诊断或报告分析。普通回归在 LLMOFF=1 下离线运行。">使用 Python、pytest 和 YAML，把接口契约与变更转成可执行用例，再把回归失败转成诊断证据、复现草稿和待验证的补测候选。HTTP、变量传递和业务断言由 Harness 执行；模型可参与规划、候选生成、语义诊断或报告分析。普通回归在 LLMOFF=1 下离线运行。</p>
+      <div class="hero-btns">
+        <a class="btn primary" href="https://github.com/" data-en="View on GitHub" data-zh="查看 GitHub 仓库">查看 GitHub 仓库</a>
+        <a class="btn ghost" href="./README.md" data-en="README" data-zh="README">README</a>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="num">698</div><div class="lbl" data-en="tests passing" data-zh="测试通过">测试通过</div></div>
+        <div class="metric"><div class="num">28</div><div class="lbl" data-en="capabilities reported" data-zh="上报能力项">上报能力项</div></div>
+        <div class="metric"><div class="num">ah</div><div class="lbl" data-en="CLI prefix" data-zh="CLI 前缀">CLI 前缀</div></div>
+      </div>
+    </div>
+    <div class="term">
+      <div class="bar"><span class="dotc r"></span><span class="dotc y"></span><span class="dotc g"></span><span id="termTitle">ah — clone & run</span></div>
+      <div class="body" id="termBody"></div>
+    </div>
+  </header>
+
+  <section id="flow">
+    <h2 data-en="Core Loop" data-zh="核心流程">核心流程</h2>
+    <div class="pipe" id="pipe">
+      <div class="node" data-i="0"><span class="n">S1</span><span class="t" data-en="Contracts & cases" data-zh="契约与用例">契约与用例</span><span class="arrow">→</span></div>
+      <div class="node" data-i="1"><span class="n">S2</span><span class="t" data-en="Execute" data-zh="执行">执行</span><span class="arrow">→</span></div>
+      <div class="node" data-i="2"><span class="n">S3</span><span class="t" data-en="Evidence & receipts" data-zh="证据与回执">证据与回执</span><span class="arrow">→</span></div>
+      <div class="node" data-i="3"><span class="n">S4</span><span class="t" data-en="Triage failures" data-zh="失败治理">失败治理</span><span class="arrow">→</span></div>
+      <div class="node" data-i="4"><span class="n">S5</span><span class="t" data-en="Evolve cases" data-zh="补测演进">补测演进</span></div>
+    </div>
+    <p class="pipe-legend" data-en="S1→S2→S3→S4→S5 → back to S2: a continuously evolving loop."
+       data-zh="S1→S2→S3→S4→S5 → 回到 S2：持续演进闭环。">S1→S2→S3→S4→S5 → 回到 S2：持续演进闭环。</p>
+  </section>
+
+  <section id="why">
+    <h2 data-en="Why" data-zh="为什么需要">为什么需要</h2>
+    <div class="cmp">
+      <div class="box anti">
+        <h4 class="anti" data-en="Without the harness" data-zh="没有它">没有它</h4>
+        <ul>
+          <li data-en="Hand-written cases go stale as interfaces change"
+              data-zh="手写用例随接口变更过时">手写用例随接口变更过时</li>
+          <li data-en="A bare “assertion failed” hides the root cause"
+              data-zh="“断言失败”难以定位根因">“断言失败”难以定位根因</li>
+          <li data-en="Backfilling cases is ad hoc and gets missed"
+              data-zh="补用例靠人肉记忆容易漏">补用例靠人肉记忆容易漏</li>
+        </ul>
+      </div>
+      <div class="box pro">
+        <h4 class="pro" data-en="With the harness" data-zh="有它之后">有它之后</h4>
+        <ul>
+          <li data-en="Contract import + coverage-gap scanning keep cases fresh"
+              data-zh="契约导入与覆盖缺口扫描，用例持续保鲜">契约导入与覆盖缺口扫描，用例持续保鲜</li>
+          <li data-en="Failure governance routes re-runs, defects and repairs"
+              data-zh="失败治理分流重跑、缺陷与修复">失败治理分流重跑、缺陷与修复</li>
+          <li data-en="Agent Loop scores/dedupes and writes candidates back"
+              data-zh="Agent Loop 评分去重并回写候选">Agent Loop 评分去重并回写候选</li>
+        </ul>
+      </div>
+    </div>
+    <h3 class="section-quote" data-en="“Turn every regression failure into the next verifiable testcase.”"
+        data-zh="“把每次回归失败变成下一个可验证的用例。”">“把每次回归失败变成下一个可验证的用例。”</h3>
+  </section>
+
+  <section id="features">
+    <h2 data-en="Key Features" data-zh="功能特性">功能特性</h2>
+    <div class="grid">
+      <div class="card"><h4><code>ah evolve</code></h4>
+        <p data-en="Agent Loop & case evolution: collect failures, generate candidates, score & dedupe, write back."
+           data-zh="Agent Loop 与用例演进：收集失败、生成候选、评分去重并回写。">Agent Loop 与用例演进：收集失败、生成候选、评分去重并回写。</p></div>
+      <div class="card"><h4><code>FailureGovernor</code></h4>
+        <p data-en="Triage failures into defects, re-runs and repair attempts with clustering & knowledge reuse."
+           data-zh="把失败分流为缺陷、重跑与修复尝试，支持失败簇与知识复用。">把失败分流为缺陷、重跑与修复尝试，支持失败簇与知识复用。</p></div>
+      <div class="card"><h4><code>ah add-case</code></h4>
+        <p data-en="Generate YAML drafts from natural language and fill boundary/abnormal candidates."
+           data-zh="从自然语言生成 YAML 草案，补充边界与异常候选。">从自然语言生成 YAML 草案，补充边界与异常候选。</p></div>
+      <div class="card"><h4><code>Execution Harness</code></h4>
+        <p data-en="Single interface, multi-step flows, multi-service, auth, datasets, cross-step dependencies."
+           data-zh="单接口、多步流程、多服务、认证、数据集与跨步依赖。">单接口、多步流程、多服务、认证、数据集与跨步依赖。</p></div>
+      <div class="card"><h4><code>ah scenario</code></h4>
+        <p data-en="Cross-interface dependency discovery from OpenAPI/HAR, compiled into executable scenarios."
+           data-zh="从 OpenAPI/HAR 提取跨接口依赖，编译为可执行场景。">从 OpenAPI/HAR 提取跨接口依赖，编译为可执行场景。</p></div>
+      <div class="card"><h4><code>ah observe</code></h4>
+        <p data-en="SQLite tracing, LLM usage stats and a local dashboard for full process observability."
+           data-zh="SQLite 追踪、LLM 用量统计与本地看板，全程可观测。">SQLite 追踪、LLM 用量统计与本地看板，全程可观测。</p></div>
+    </div>
+  </section>
+
+  <section id="try">
+    <h2 data-en="Try a Command" data-zh="试用命令">试用命令</h2>
+    <div class="try-chips">
+      <button class="chip" data-cmd="install" data-en="Install" data-zh="安装">安装</button>
+      <button class="chip" data-cmd="demo" data-en="Run demo" data-zh="跑示例">跑示例</button>
+      <button class="chip" data-cmd="tests" data-en="Framework tests" data-zh="框架测试">框架测试</button>
+      <button class="chip" data-cmd="scaffold" data-en="Scaffold project" data-zh="生成项目">生成项目</button>
+      <button class="chip" data-cmd="build" data-en="uv build" data-zh="构建产物">构建产物</button>
+    </div>
+    <div class="try-term" id="tryTerm"></div>
+  </section>
+
+  <section id="structure">
+    <h2 data-en="Repository Structure" data-zh="目录结构">目录结构</h2>
+    <div class="tree" id="tree">
+      <div class="dir" data-folder="root" data-open="1">auto-api-test-harness/</div>
+      <div id="root-wrapper" style="margin-left:16px;">
+        <div class="file">README.md</div>
+        <div class="file">README.zh-CN.md</div>
+        <div class="file">LICENSE</div>
+        <div class="file">pyproject.toml</div>
+        <div class="file">uv.lock</div>
+        <div class="file">.gitignore</div>
+        <div class="file">.gitattributes</div>
+        <div><span class="dir" data-folder="src">src/ah/</span>
+          <div class="hidden" data-wrap="src">
+            <div class="file">cli.py</div>
+            <div class="dir" data-folder="core-c">core/</div>
+            <div class="dir" data-folder="harness-c">harness/</div>
+            <div class="dir" data-folder="evol-c">evolution.py</div>
+            <div class="dir" data-folder="fail-c">failure/</div>
+            <div class="dir" data-folder="llm-c">llm/</div>
+            <div class="dir" data-folder="scen-c">scenario/</div>
+            <div class="dir" data-folder="obs-c">observe/</div>
+            <div class="dir" data-folder="q-c">quality/</div>
+          </div>
+        </div>
+        <div><span class="dir" data-folder="cfg">config/</span>
+          <div class="hidden" data-wrap="cfg"><div class="file">config.yaml</div></div>
+        </div>
+        <div><span class="dir" data-folder="proj">projects/demo/</span>
+          <div class="hidden" data-wrap="proj">
+            <div class="file">data/</div><div class="file">flows/</div><div class="file">skills/</div><div class="file">test_demo.py</div>
+          </div>
+        </div>
+        <div class="file">tests/</div>
+        <div><span class="dir" data-folder="sk">skills/auto-api-test-harness/</span>
+          <div class="hidden" data-wrap="sk"><div class="file">SKILL.md · references/ · workflows/</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px; font-size:.8rem; color:var(--fg-dim);" data-en="Click a folder to expand/collapse."
+        data-zh="点击文件夹打开/收起。">点击文件夹打开/收起。</div>
+  </section>
+
+  <section id="schedule">
+    <h2 data-en="Automation Schedule" data-zh="自动化日程">自动化日程</h2>
+    <div class="schedule">
+      <div class="sched-item" data-start="0" data-end="6"><div class="time" data-en="On push" data-zh="提交时">提交时</div>
+        <div class="what" data-en="ci-trigger: run affected interfaces from Git changes"
+            data-zh="ci-trigger：按 Git 变更跑受影响接口">ci-trigger：按 Git 变更跑受影响接口</div></div>
+      <div class="sched-item" data-start="0" data-end="24"><div class="time" data-en="Any time" data-zh="随时">随时</div>
+        <div class="what" data-en="scheduled-run / trend-gate for long-running regression"
+            data-zh="scheduled-run / trend-gate 长期回归">scheduled-run / trend-gate 长期回归</div></div>
+      <div class="sched-item" data-start="0" data-end="24"><div class="time" data-en="Manual" data-zh="手动">手动</div>
+        <div class="what" data-en="evolve: offline candidate generation from failures"
+            data-zh="evolve：从失败离线生成候选">evolve：从失败离线生成候选</div></div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2 data-en="FAQ" data-zh="常见问题">常见问题</h2>
+    <div class="grid">
+      <div class="card"><h4 data-en="Do I need a model?" data-zh="一定要用模型吗？">一定要用模型吗？</h4>
+        <p data-en="No. Plain regression runs with LLMOFF=1; models only enhance planning, candidate generation, diagnosis and reporting."
+           data-zh="不用。普通回归在 LLMOFF=1 下即可运行；模型仅增强规划、候选生成、诊断与报告。">不用。普通回归在 LLMOFF=1 下即可运行；模型仅增强规划、候选生成、诊断与报告。</p></div>
+      <div class="card"><h4 data-en="What format?" data-zh="用什么格式写用例？">用什么格式写用例？</h4>
+        <p data-en="YAML — single interfaces, multi-step flows, datasets, assertions and retries."
+           data-zh="YAML —— 单接口、多步流程、数据集、断言与重试。">YAML —— 单接口、多步流程、数据集、断言与重试。</p></div>
+      <div class="card"><h4 data-en="Are candidates auto-written?" data-zh="候选会自动写回吗？">候选会自动写回吗？</h4>
+        <p data-en="ah evolve appends high-score candidates to data/evolution.yaml for review; use ah evolve --undo to revert."
+           data-zh="ah evolve 会把高分候选追加到 data/evolution.yaml 供审查；可用 ah evolve --undo 撤回。">ah evolve 会把高分候选追加到 data/evolution.yaml 供审查；可用 ah evolve --undo 撤回。</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-inner">
+      <div>© 2026 Alan_Hsu · <a href="./LICENSE">MIT</a></div>
+      <div><span data-en="Local time" data-zh="本地时间">本地时间</span>: <span id="clock">--:--</span></div>
+      <div class="foot-links">
+        <a href="./README.md" data-en="EN README" data-zh="英文 README">英文 README</a>
+        <a href="./README.zh-CN.md" data-en="中文 README" data-zh="中文 README">中文 README</a>
+        <a href="https://github.com/">GitHub · Discussions</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var lang = 'zh';
+  var COPY = {
+    'ah — clone & run':'ah — 克隆与运行'
+  };
+
+  // --- language toggle ---
+  function setLang(l){
+    lang = l;
+    document.documentElement.lang = l==='zh' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-en],[data-zh]').forEach(function(el){
+      var k = lang==='zh' ? 'data-zh' : 'data-en';
+      if(el.hasAttribute(k)) el.innerHTML = el.getAttribute(k);
+    });
+    updateTry(); updateTermTitle();
+  }
+  document.getElementById('langToggle').addEventListener('click', function(){
+    setLang(lang==='zh' ? 'en' : 'zh');
+  });
+
+  // --- typewriter terminal ---
+  var termLines = {
+    install:['$ uv sync --locked --extra all','✓ 698 tests referenced · env ready'],
+    demo:['$ LLMOFF=1 uv run --locked pytest -q projects/demo','✓ 4 passed (report.html generated)'],
+    tests:['$ LLMOFF=1 uv run --locked pytest -q tests projects/demo','✓ 698 passed'],
+    scaffold:['$ LLMOFF=1 uv run --locked ah scaffold example-api \\','  --api http://127.0.0.1:8000/health','✓ projects/example_api created'],
+    build:['$ uv build','✓ dist/auto_api_test_harness-0.1.0.tar.gz','✓ dist/...-py3-none-any.whl']
+  };
+  var termEl = document.getElementById('termBody');
+  var tryEl = document.getElementById('tryTerm');
+  var current = 'install'; var typing = false;
+
+  function typeInto(el, lines, cb){
+    if(typing) return; typing = true;
+    el.textContent=''; var li=0, pos=0;
+    function tick(){
+      if(li>=lines.length){ typing=false; el.insertAdjacentHTML('beforeend','<span class="cursor"></span>'); if(cb)cb(); return; }
+      var line = lines[li];
+      if(pos<line.length){ el.textContent = lines.slice(0,li).join('\n')+(pos>0?'\n':'')+line.slice(0,pos+1); pos++; }
+      else { li++; pos=0; }
+      setTimeout(tick, li>=lines.length ? 240 : 12);
+    }
+    setTimeout(tick, 300);
+  }
+
+  function updateTry(){
+    var cmd = document.querySelector('.chip[data-cmd="'+current+'"]');
+    // prefill instantly (non-typing) for chip clicks
+  }
+function runTry(cmd){
+    current = cmd; var title = document.getElementById('termTitle');
+    title.textContent = 'ah — ' + cmd;
+    typing = false; // 强制打断其它进行中的打字，确保 chip 输出立即生效
+    typeInto(tryEl, termLines[cmd].slice(), null);
+}
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.addEventListener('click', function(){ runTry(c.getAttribute('data-cmd')); });
+  });
+  function updateTermTitle(){
+    var t = document.getElementById('termTitle');
+    var base = 'ah — ' + current;
+    if(lang==='zh' && COPY[base]) t.textContent = COPY[base];
+    else t.textContent = base;
+  }
+
+  // initial typewriter (install)
+// initial hero terminal typewriter (install)
+  setTimeout(function(){ typeInto(termEl, termLines['install'].slice(), null); }, 500);
+  // loop the hero terminal animation between a couple of command outputs
+  var heroSeq = ['install','demo','tests'];
+  var hi=0;
+  setInterval(function(){
+    if(!document.hidden){
+      hi=(hi+1)%heroSeq.length;
+      typeInto(termEl, termLines[heroSeq[hi]].slice(), null);
+    }
+  }, 9000);
+
+  // --- pipeline animation ---
+  var nodes = document.querySelectorAll('#pipe .node'); var ni=0;
+  setInterval(function(){
+    nodes.forEach(function(n){ n.classList.remove('done'); });
+    nodes[ni].classList.add('done'); ni=(ni+1)%nodes.length;
+  }, 1200);
+
+// --- tree expand/collapse ---
+  document.querySelectorAll('.tree .dir[data-folder]').forEach(function(d){
+    d.addEventListener('click', function(){
+      // 找相邻的 data-wrap 块（dir 后紧跟的同级展开区）
+      var wrap = d.nextElementSibling && d.nextElementSibling.hasAttribute && d.nextElementSibling.hasAttribute('data-wrap') ? d.nextElementSibling : null;
+      if(!wrap) wrap = d.parentElement && d.parentElement.querySelector && d.parentElement.querySelector('[data-wrap]');
+      if(wrap && wrap.classList){
+        wrap.classList.toggle('hidden');
+        d.setAttribute('data-open', wrap.classList.contains('hidden') ? '0' : '1');
+      }
+    });
+  });
+
+  // --- clock + schedule highlight ---
+  function tick(){
+    var d=new Date();
+    var hh=('0'+d.getHours()).slice(-2), mm=('0'+d.getMinutes()).slice(-2), ss=('0'+d.getSeconds()).slice(-2);
+    document.getElementById('clock').textContent = hh+':'+mm+':'+ss;
+    var h=d.getHours() + d.getMinutes()/60;
+    document.querySelectorAll('.sched-item').forEach(function(s){
+      var st=+s.getAttribute('data-start'), en=+s.getAttribute('data-end');
+      var now = h>=st && h<en;
+      s.classList.toggle('now', now);
+    });
+  }
+  tick(); setInterval(tick,1000);
+
+  // --- scroll reveal ---
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  }, {threshold:.08});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+  // mark sections as reveal
+  document.querySelectorAll('section').forEach(function(s){ s.classList.add('reveal'); io.observe(s); });
+})();
+</script>
+</body>
+</html>
