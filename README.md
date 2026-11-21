@@ -384,4 +384,4 @@ LLMOFF=1 uv run --locked pytest -q projects/example_api
 
 ## Maintainer
 
-- [Alan_Hsu](https://github.com/)
+- [Alan_Hsu](https://github.com/xsoway)
