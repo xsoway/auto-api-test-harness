@@ -11,8 +11,8 @@
 | **C** | README 质量 | ✅ 通过 | 中英双语双文件、互指切换链接；含 Maintainer / Contributing / Roadmap / FAQ / 架构图 / 目录树释义；快速开始命令实测可跑 |
 | **D** | 敏感信息扫描 | ✅ 通过 | 201 个已跟踪文件全量正则扫描：零绝对本机路径（`/Users/`、`/home/`）；5 处 `authorization` 均为标准 HTTP 头名，非凭据 |
 | **E** | 可验证性 | ✅ 通过 | `LLMOFF=1 ... pytest -q tests projects/demo` → **698 passed** (11.18s)；`uv build` → `dist/auto_api_test_harness-0.1.0.tar.gz` + `-py3-none-any.whl` |
-| **F** | 发布动作授权 | ⏳ 待执行 | 未执行任何 `git push` / `gh repo create`（遵守授权红线）；命令见下 |
-| **G** | 可发现性 | ⏳ 待执行 | 未配置 About / topics / Discussions；命令见下 |
+| **F** | 发布动作授权 | ✅ 已执行 | 用户授权（xsoway，public）。`gh repo create auto-api-test-harness --public --source . --remote origin --push` → `https://github.com/xsoway/auto-api-test-harness`（PUBLIC），远端 `main`=`a26b373`，工作树 clean |
+| **G** | 可发现性 | ✅ 已执行 | `gh repo edit` 已加 6 topics（api-testing/pytest/yaml/test-automation/llm/openapi）+ 描述；`gh repo view --json repositoryTopics` 已验证 |
 | **H** | 项目主页 | ✅ 通过 | `index.html`（gruvbox 黑金风格）已生成并提交 `b6fa4f2`；无头浏览器自测 **16/16 通过**，380px 无横向溢出，敏感扫描 clean |
 | **I** | 社区运营 | ⏳ 待执行 | GitHub Discussions 为仓库级功能，合并前手动在仓库 Settings 开启（见下） |
 | **J** | 发布产物 | ✅ 就绪 | `dist/*.tar.gz` + `dist/*.whl` 已由 `uv build` 生成（gitignored）；release 命令见下 |
@@ -74,5 +74,6 @@ gh release create v0.1.0 \
 ## 验证签名
 
 - 检查执行时间：2026-06-26
-- 执行人：Alan_Hsu（发布动作 F/G/I 仍需用户显式授权）
-- 数据版本 / 基线：`v0.1.0` (commit `b6fa4f2`)
+- 执行人：Alan_Hsu / xsoway（F 推送、G topics 已获授权并执行）
+- 发布了仓库：public → `https://github.com/xsoway/auto-api-test-harness`
+- 数据版本 / 基线：`v0.1.0` (commit `b6fa4f2`；推送 HEAD `a26b373`)
