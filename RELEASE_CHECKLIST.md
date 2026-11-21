@@ -13,7 +13,7 @@
 | **E** | 可验证性 | ✅ 通过 | `LLMOFF=1 ... pytest -q tests projects/demo` → **698 passed** (11.18s)；`uv build` → `dist/auto_api_test_harness-0.1.0.tar.gz` + `-py3-none-any.whl` |
 | **F** | 发布动作授权 | ✅ 已执行 | 用户授权（xsoway，public）。`gh repo create auto-api-test-harness --public --source . --remote origin --push` → `https://github.com/xsoway/auto-api-test-harness`（PUBLIC），远端 `main`=`a26b373`，工作树 clean |
 | **G** | 可发现性 | ✅ 已执行 | `gh repo edit` 已加 6 topics（api-testing/pytest/yaml/test-automation/llm/openapi）+ 描述；`gh repo view --json repositoryTopics` 已验证 |
-| **H** | 项目主页 | ✅ 通过 | `index.html`（gruvbox 黑金风格）已生成并提交 `b6fa4f2`；无头浏览器自测 **16/16 通过**，380px 无横向溢出，敏感扫描 clean |
+| **H** | 项目主页 | ✅ 已上线 | `index.html`（gruvbox 黑金）已生成并提交；**GitHub Pages 官方主页已启用**：`https://xsoway.github.io/auto-api-test-harness/`（source=`main:/` + `.nojekyll` 跳过 Jekyll）；`homepageUrl` 已指向它；本地+线上无头浏览器自测均通过（桌面 + 380px 无溢出、console 零报错）。 |
 | **I** | 社区运营 | ⏳ 待执行 | GitHub Discussions 为仓库级功能，合并前手动在仓库 Settings 开启（见下） |
 | **J** | 发布产物 | ✅ 就绪 | `dist/*.tar.gz` + `dist/*.whl` 已由 `uv build` 生成（gitignored）；release 命令见下 |
 | **K** | 质量门禁 | ✅ 通过 | 本文件即 RELEASE_CHECKLIST.md，A/B/C/D/E/H/K 已落盘证据；存档前叠加 `verify_task` 类 gate |
@@ -76,4 +76,5 @@ gh release create v0.1.0 \
 - 检查执行时间：2026-06-26
 - 执行人：Alan_Hsu / xsoway（F 推送、G topics 已获授权并执行）
 - 发布了仓库：public → `https://github.com/xsoway/auto-api-test-harness`
-- 数据版本 / 基线：`v0.1.0` (commit `b6fa4f2`；推送 HEAD `a26b373`)
+- 官方主页：GitHub Pages → `https://xsoway.github.io/auto-api-test-harness/`（`homepageUrl` 已指向）
+- 数据版本 / 基线：`v0.1.0` (commit `b6fa4f2`；推送 HEAD `a26b373`，主页部署依赖 `.nojekyll` 提交 `768ea0b`)
