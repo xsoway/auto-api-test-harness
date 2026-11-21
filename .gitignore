@@ -1,0 +1,32 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+artifacts/
+*.log
+.coverage
+htmlcov/
+report/
+projects/*/report/
+# CLI 运行时产物（telemetry 账本 / evolution 审计日志），不入库
+llm_telemetry.json
+property_report.json
+_evolution_log.jsonl
+**/llm_usage.jsonl
+# 自主演进写回产物（LLM 派生的演化场景，非手写用例，不入库）
+**/evolution.yaml
+# 本地过程链路运行库（local-obs SQLite，Tracer 双写默认落盘），不入库
+local-obs.sqlite3
+
+# 本地认证与构建产物
+config/tokens.json
+config/*.local.yaml
+*.egg-info/
+.hypothesis/
+.ruff_cache/
+.dist/
+dist/
+build/
+.DS_Store
+web/node_modules/

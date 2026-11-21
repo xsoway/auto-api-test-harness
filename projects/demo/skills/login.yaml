@@ -1,0 +1,19 @@
+# 登录 skill：换取 user_token（后续步骤以 ${user_token} 消费）。
+name: login
+description: 登录获取访问令牌
+works_on: default
+outputs: [user_token]
+side_effects: [read]
+steps:
+  - name: login
+    request:
+      method: POST
+      path: /login
+      json:
+        username: alice
+    assert:
+      status_code: 200
+    extract:
+      user_token:
+        path: token
+        extract_type: jsonpath

@@ -1,0 +1,20 @@
+# 分类元数据演示：
+#   env      目标环境：all | test | prod（可逗号并列）
+#   priority 重要级：P0 | P1 | P2
+#   suite    用例集：smoke | regression | prod | all
+#   tags     自由标签（供 select_cases 按 OR 匹配）
+#
+# 配合分类过滤（在项目 test 执行入口里用 select_cases 驱动）：
+#   冒烟（test 环境）：select_cases(cases, suite="smoke", env="test")
+#   生产回归 P0：     select_cases(cases, env="prod", suite="regression", priority="P0")
+#   打标签子集：      select_cases(cases, tags=["auth"])
+name: health-check
+request:
+  method: GET
+  path: /health
+env: test,prod
+priority: P0
+suite: smoke
+tags: [health, fast]
+assert:
+  status_code: 200

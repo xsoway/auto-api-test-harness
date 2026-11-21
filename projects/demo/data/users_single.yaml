@@ -1,0 +1,17 @@
+# 单接口用例：GET /users/{id}
+name: get-user-by-id
+request:
+  method: GET
+  path: /users/${user_id}
+  headers:
+    Accept: application/json
+auth: default_token
+assert:
+  status_code: 200
+  jsonpath:
+    user.id:
+      eq: ${user_id}
+extract:
+  fetched_name:
+    path: user.name
+    extract_type: jsonpath

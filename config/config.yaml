@@ -1,0 +1,13 @@
+settings:
+  base_url: http://127.0.0.1:8000
+  token_store_path: config/tokens.json
+  report_dir: artifacts/reports
+  log_dir: artifacts/logs
+  trace_enabled: false
+
+llm:
+  provider_base_url: https://openrouter.ai/api/v1/
+  api_key: ""
+  model_cheap: ""
+  model_strong: ""
+  timeout: 120.0

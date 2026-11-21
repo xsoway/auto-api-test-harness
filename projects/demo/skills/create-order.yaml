@@ -1,0 +1,26 @@
+# 创建订单 skill：接收 item_id，返回 order_id。
+name: create-order
+description: 创建订单并返回订单号
+works_on: default
+inputs: [item_id]
+outputs: [order_id]
+defaults: { item_id: 7 }
+side_effects: [write]
+steps:
+  - name: create
+    request:
+      method: POST
+      path: /orders
+      headers:
+        Authorization: "Bearer ${user_token}"
+      json:
+        item_id: "${item_id}"
+    assert:
+      status_code: 201
+      jsonpath:
+        order.id:
+          type: integer
+    extract:
+      order_id:
+        path: order.id
+        extract_type: jsonpath

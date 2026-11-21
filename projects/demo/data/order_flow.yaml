@@ -1,0 +1,33 @@
+# 场景流程：登录 -> 创建订单，将 user_token 向下游传递。
+name: order-flow
+on_failure: stop
+scenario:
+  - name: login
+    request:
+      method: POST
+      path: /login
+      json:
+        username: alice
+    assert:
+      status_code: 200
+    extract:
+      user_token:
+        path: token
+        extract_type: jsonpath
+  - name: create-order
+    request:
+      method: POST
+      path: /orders
+      headers:
+        Authorization: "Bearer ${user_token}"
+      json:
+        item_id: 7
+    assert:
+      status_code: 201
+      jsonpath:
+        order.id:
+          type: integer
+    extract:
+      order_id:
+        path: order.id
+        extract_type: jsonpath

@@ -1,0 +1,13 @@
+# 统一行尾：text 文件统一 LF，避免跨平台 diff 噪音
+* text=auto eol=lf
+
+# 二进制文件不经过文本转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.whl binary
+*.tar.gz binary
+*.sqlite3 binary

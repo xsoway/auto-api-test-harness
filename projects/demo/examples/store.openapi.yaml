@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: Synthetic store
+  version: "1.0"
+paths:
+  /featured-product:
+    get:
+      operationId: getFeaturedProduct
+      responses:
+        "200":
+          description: Featured product
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sku]
+                properties:
+                  sku: {type: string}
+  /orders:
+    post:
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sku]
+              properties:
+                sku: {type: string}
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [state]
+                properties:
+                  state: {type: string, enum: [CREATED]}

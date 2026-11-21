@@ -1,0 +1,21 @@
+# 组装业务流程：登录 -> 创建订单 + assign 上提 -> 内联查询步骤。
+# 演示 skill 互调（call/with/assign）与内联步骤混合的「组装」执行。
+name: order-create
+flow:
+  - call: login
+    assign:
+      user_token: "${user_token}"
+  - call: create-order
+    with:
+      item_id: 5
+    assign:
+      order_id: "${order_id}"
+  # 内联步骤：消费已上提的 order_id 做一次查询核对。
+  - name: fetch-order
+    request:
+      method: GET
+      path: "/orders/${order_id}"
+      headers:
+        Authorization: "Bearer ${user_token}"
+    assert:
+      status_code: 200
